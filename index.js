@@ -24,14 +24,42 @@ app.post('/register',(req,res)=>{
     
     const result= dataservice.register(req.body.uname,req.body.acno,req.body.password)
 
-    if(result){
-        res.send("Successfully Registered")
-    }
-    else{
-        res.send("Account already existing")
-    }
+    // if(result){
+    //     res.send("Successfully Registered")
+    // }
+    // else{
+    //     res.send("Account already existing")
+    // }
+    // this is using true or false return
 
+res.status(result.statusCode).json(result)
+})
 
+// resolve login API 
+
+app.post('/login',(req,res)=>{ 
+    
+    const result= dataservice.login(req.body.acno,req.body.pswd)
+
+res.status(result.statusCode).json(result)
+})
+
+// resolve deposit API
+
+app.post('/deposit',(req,res)=>{ 
+    
+    const result= dataservice.deposit(req.body.acno,req.body.pswd,req.body.amt)
+
+    res.status(result.statusCode).json(result)
+})
+
+// resolve withdraw API
+
+app.post('/withdraw',(req,res)=>{ 
+    
+    const result= dataservice.withdraw(req.body.acno,req.body.pswd,req.body.amt)
+
+    res.status(result.statusCode).json(result)
 })
 
 app.listen(3000,()=>{ console.log('server started at 3000');})  //set port number
