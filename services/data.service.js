@@ -1,3 +1,7 @@
+
+const jwt = require('jsonwebtoken')
+
+
 database = {
 
     1000: { acno: 1000, uname: "Aleena", password: 1000, balance: 750, transaction: [] },
@@ -43,11 +47,22 @@ const login = (acno, pswd) => {
 
         if (pswd == database[acno]["password"]) {
             currentUser = database[acno]["uname"]
+            currentAcno = acno
+            // login succesfull
+
+            const token=jwt.sign({
+
+                currentAcno : acno
+
+            },'supersecret12345678')
+
             return {
                 statusCode: 200,
                 status: true,
-                message: 'Login Succesfull'
-
+                message: 'Login Succesfull',
+                token:token,
+                currentUser,
+                currentAcno
             }
         }
         else {
@@ -113,11 +128,18 @@ const deposit = (acno, pswd, amt) => {
 
 // resolve withdraw API
 
-const withdraw = (acno, pswd, amt) => {
+const withdraw = (req,acno, pswd, amt) => {
     var amount = parseInt(amt);
 
     if (acno in database) {
         if (pswd == database[acno]["password"]) {
+            if(req.currentAcno!=acno){
+                return{
+                    statusCode: 422,
+                    status: false,
+                    message: " operation denied"
+                }
+            }
             if (database[acno]["balance"] > amount) {
                 database[acno]["balance"] -= amount;
                 database[acno]["transaction"].push({
@@ -162,12 +184,34 @@ const withdraw = (acno, pswd, amt) => {
 
 }
 
+//transaction
+
+const transaction = (acno)=>{
+
+    if(acno in database){
+        return{
+            statusCode: 200,
+            status: true,
+            transaction:database[acno].transaction
+        }
+    }
+    else{
+        return{
+            statusCode: 422,
+            status: false,
+            message:"User doesnot exit"
+        }
+    }
+
+  }
+
 // export module
 
 module.exports = {
     register,
     login,
     deposit,
-    withdraw
+    withdraw,
+    transaction
 }
 

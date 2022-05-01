@@ -2,6 +2,8 @@
 
 const express =  require('express'); //import express
 
+const jwt = require('jsonwebtoken'); // import jsonwebtoken
+
 const dataservice = require('./services/data.service')
 
 const app = express() //server app using express
@@ -17,6 +19,34 @@ app.put('/',(req,res)=>{res.send("PUT REQUEST1")}) //resolving api call - here u
 app.patch('/',(req,res)=>{res.send("PATCH REQUEST1")}) //resolving api call - here used PATCH to simply MODIFY  SMALL PORTIONS OF DATA
 
 app.delete('/',(req,res)=>{res.send("DELETE REQUEST1")}) //resolving api call - here used DELETE to simply DELETE
+
+
+// logMiddleware - application specific middleware
+
+// const logMiddleware = (res,req,next)=>{
+//     console.log("APLLICATION SPECIFIC MIDDLEWARE");
+//     next()
+// }
+
+// app.use(logMiddleware)
+
+// jwt middleware
+
+const jwtMiddleware=(req,res,next)=>{
+   try {
+       const token = req.headers["x-acess-token"] // using header path here
+        const data= jwt.verify(token,'supersecret12345678')
+        req.currentAcno= data.currentAcno;
+    next()
+    }
+
+catch{
+    res.status(401).json({
+        status:false,
+        message:"please log in"
+    })
+}
+}
 
 // resolve register API
 
@@ -46,7 +76,7 @@ res.status(result.statusCode).json(result)
 
 // resolve deposit API
 
-app.post('/deposit',(req,res)=>{ 
+app.post('/deposit',jwtMiddleware,(req,res)=>{ 
     
     const result= dataservice.deposit(req.body.acno,req.body.pswd,req.body.amt)
 
@@ -55,9 +85,18 @@ app.post('/deposit',(req,res)=>{
 
 // resolve withdraw API
 
-app.post('/withdraw',(req,res)=>{ 
+app.post('/withdraw',jwtMiddleware,(req,res)=>{ 
     
-    const result= dataservice.withdraw(req.body.acno,req.body.pswd,req.body.amt)
+    const result= dataservice.withdraw(req,req.body.acno,req.body.pswd,req.body.amt)
+
+    res.status(result.statusCode).json(result)
+})
+
+// resolve transaction API
+
+app.post('/transaction',jwtMiddleware,(req,res)=>{ 
+    
+    const result= dataservice.transaction(req.body.acno)
 
     res.status(result.statusCode).json(result)
 })
