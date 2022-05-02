@@ -48,21 +48,32 @@ catch{
 }
 }
 
-// resolve register API
+// resolve register API and synchronous
+
+// app.post('/register',(req,res)=>{ 
+    
+//     const result= dataservice.register(req.body.uname,req.body.acno,req.body.password)
+
+//     // if(result){
+//     //     res.send("Successfully Registered")
+//     // }
+//     // else{
+//     //     res.send("Account already existing")
+//     // }
+//     // this is using true or false return
+
+// res.status(result.statusCode).json(result)
+// })
+
+
+// register API asynch
+
 
 app.post('/register',(req,res)=>{ 
     
-    const result= dataservice.register(req.body.uname,req.body.acno,req.body.password)
+    dataservice.register(req.body.uname,req.body.acno,req.body.password).then(result=>{
 
-    // if(result){
-    //     res.send("Successfully Registered")
-    // }
-    // else{
-    //     res.send("Account already existing")
-    // }
-    // this is using true or false return
-
-res.status(result.statusCode).json(result)
+res.status(result.statusCode).json(result)})
 })
 
 // resolve login API 

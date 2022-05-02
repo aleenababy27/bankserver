@@ -1,8 +1,11 @@
 
 const jwt = require('jsonwebtoken')
 
+const db = require('./db')
+
 
 database = {
+
 
     1000: { acno: 1000, uname: "Aleena", password: 1000, balance: 750, transaction: [] },
     1001: { acno: 1001, uname: "Mariya", password: 1001, balance: 1500, transaction: [] },
@@ -13,30 +16,60 @@ database = {
 const register = (uname, acno, password) => {
 
 
-    if (acno in database) {
-        return {
-            statusCode: 401,
-            status: false,
-            message: 'Account already existing'
+    db.User.findOne({acno}).then(user=>{
 
+        if (acno in database) {
+            return {
+                statusCode: 401,
+                status: false,
+                message: 'Account already existing'
+    
+            }
         }
-    }
-    else {
-        database[acno] = {
-            acno,
-            uname,
-            password,
-            balance: 0,
-            transaction: []
-        }
-        console.log(database);
-        return {
-            statusCode: 200,
-            status: true,
-            message: 'Successfully Registered'
+        else{
+            const newUser=newUser({
+                    acno,
+                    uname,
+                    password,
+                    balance:0,
+                    transaction:[]
+            })
 
-        }
-    }
+            newUser.save()
+
+            return {
+                statusCode: 200,
+                status: true,
+                message: 'Successfully Registered'
+        }}
+
+    })
+
+
+    // if (acno in database) {
+    //     return {
+    //         statusCode: 401,
+    //         status: false,
+    //         message: 'Account already existing'
+
+    //     }
+    // }
+    // else {
+    //     database[acno] = {
+    //         acno,
+    //         uname,
+    //         password,
+    //         balance: 0,
+    //         transaction: []
+    //     }
+    //     console.log(database);
+    //     return {
+    //         statusCode: 200,
+    //         status: true,
+    //         message: 'Successfully Registered'
+
+    //     }
+    // }
 }
 
 // resolving login API
