@@ -16,9 +16,9 @@ database = {
 const register = (uname, acno, password) => {
 
 
-    db.User.findOne({acno}).then(user=>{
+   return db.User.findOne({acno}).then(user=>{
 
-        if (acno in database) {
+        if (user) {
             return {
                 statusCode: 401,
                 status: false,
@@ -27,7 +27,7 @@ const register = (uname, acno, password) => {
             }
         }
         else{
-            const newUser=newUser({
+            const newUser=new db.User({
                     acno,
                     uname,
                     password,

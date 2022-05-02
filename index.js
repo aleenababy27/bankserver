@@ -65,15 +65,15 @@ catch{
 // res.status(result.statusCode).json(result)
 // })
 
-
+// 
 // register API asynch
 
 
 app.post('/register',(req,res)=>{ 
     
     dataservice.register(req.body.uname,req.body.acno,req.body.password).then(result=>{
-
-res.status(result.statusCode).json(result)})
+        res.status(result.statusCode).json(result)
+})
 })
 
 // resolve login API 
