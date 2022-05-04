@@ -78,12 +78,21 @@ app.post('/register',(req,res)=>{
 
 // resolve login API 
 
+// app.post('/login',(req,res)=>{ 
+    
+//     const result= dataservice.login(req.body.acno,req.body.pswd)
+
+// res.status(result.statusCode).json(result)
+// })
+
+
 app.post('/login',(req,res)=>{ 
     
-    const result= dataservice.login(req.body.acno,req.body.pswd)
-
-res.status(result.statusCode).json(result)
+    dataservice.login(req.body.acno,req.body.pswd).then(result=>{
+        res.status(result.statusCode).json(result)
 })
+})
+
 
 // resolve deposit API
 

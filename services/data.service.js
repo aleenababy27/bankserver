@@ -76,10 +76,10 @@ const register = (uname, acno, password) => {
 
 const login = (acno, pswd) => {
 
-    if (acno in database) {
+    return db.User.findOne({acno,password:pswd}).then(user=>{
 
-        if (pswd == database[acno]["password"]) {
-            currentUser = database[acno]["uname"]
+        if (user) {
+            currentUser = user.uname
             currentAcno = acno
             // login succesfull
 
@@ -103,22 +103,15 @@ const login = (acno, pswd) => {
             return {
                 statusCode: 422,
                 status: false,
-                message: 'Invalid password'
+                message: 'Invalid credentials'
 
             }
         }
-
-    }
-    else {
-        return {
-            statusCode: 422,
-            status: false,
-            message: 'Invalid User'
-
-        }
-    }
-
+    
+    })
+    
 }
+
 
 // resolving deposit API
 
