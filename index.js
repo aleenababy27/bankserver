@@ -4,9 +4,13 @@ const express =  require('express'); //import express
 
 const jwt = require('jsonwebtoken'); // import jsonwebtoken
 
+const cors = require('cors'); // import corse
+
 const dataservice = require('./services/data.service')
 
 const app = express() //server app using express
+
+app.use(cors({orgin:'http://localhost:4200'})) // using corse
 
 app.use(express.json()) // parse json to data
 
@@ -96,32 +100,54 @@ app.post('/login',(req,res)=>{
 
 // resolve deposit API
 
+// app.post('/deposit',jwtMiddleware,(req,res)=>{ 
+    
+//     const result= dataservice.deposit(req.body.acno,req.body.pswd,req.body.amt)
+
+//     res.status(result.statusCode).json(result)
+// })
+
+
 app.post('/deposit',jwtMiddleware,(req,res)=>{ 
     
-    const result= dataservice.deposit(req.body.acno,req.body.pswd,req.body.amt)
-
-    res.status(result.statusCode).json(result)
+   dataservice.deposit(req.body.acno,req.body.pswd,req.body.amt).then(result=>{
+        res.status(result.statusCode).json(result)
+   })
 })
-
 // resolve withdraw API
+
+// app.post('/withdraw',jwtMiddleware,(req,res)=>{ 
+    
+//     const result= dataservice.withdraw(req,req.body.acno,req.body.pswd,req.body.amt)
+
+//     res.status(result.statusCode).json(result)
+// })
 
 app.post('/withdraw',jwtMiddleware,(req,res)=>{ 
     
-    const result= dataservice.withdraw(req,req.body.acno,req.body.pswd,req.body.amt)
+    dataservice.withdraw(req.body.acno,req.body.pswd,req.body.amt).then(result=>{
+         res.status(result.statusCode).json(result)
+    })
+ })
+ // 
 
-    res.status(result.statusCode).json(result)
-})
 
 // resolve transaction API
 
-app.post('/transaction',jwtMiddleware,(req,res)=>{ 
+// app.post('/transaction',jwtMiddleware,(req,res)=>{ 
     
-    const result= dataservice.transaction(req.body.acno)
+//     const result= dataservice.transaction(req.body.acno)
 
-    res.status(result.statusCode).json(result)
+//     res.status(result.statusCode).json(result)
+// })
+
+app.post('/transaction',jwtMiddleware,(req,res)=>{ 
+    dataservice.transaction(req.body.acno).then(result=>{res.status(result.statusCode).json(result)
+})
 })
 
 app.listen(3000,()=>{ console.log('server started at 3000');})  //set port number
 
 
 
+   

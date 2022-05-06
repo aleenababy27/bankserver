@@ -1,4 +1,5 @@
 
+const req = require('express/lib/request')
 const jwt = require('jsonwebtoken')
 
 const db = require('./db')
@@ -80,7 +81,7 @@ const login = (acno, pswd) => {
 
         if (user) {
             currentUser = user.uname
-            currentAcno = acno
+            currentAcno = user.acno
             // login succesfull
 
             const token=jwt.sign({
@@ -118,95 +119,169 @@ const login = (acno, pswd) => {
 const deposit = (acno, pswd, amt) => {
     var amount = parseInt(amt);
 
-    if (acno in database) {
-        if (pswd == database[acno]["password"]) {
-            database[acno]["balance"] += amount;
+    return db.User.findOne({acno,password:pswd,amt}).then(user=>{
+        if(user){
+           user.balance += amount;
 
-            database[acno]["transaction"].push({
+            user.transaction.push({
                 type: "CREDIT",
                 amount: amount
             })
 
+                user.save()
+
             return {
                 statusCode: 200,
                 status: true,
-                message: 'balance is ' + database[acno]["balance"]
+                message: 'balance is ' + user.balance
             }
+        
         }
+
         else {
+
             return {
                 statusCode: 422,
                 status: false,
-                message: 'Invalid password'
+                message: 'Invalid credentials'
 
             }
         }
-    }
-    else {
-        return {
-            statusCode: 422,
-            status: false,
-            message: "Wrong Accont Number"
-        }
-    }
+    
+
+    })
+    // if (acno in database) {
+    //     if (pswd == database[acno]["password"]) {
+    //         database[acno]["balance"] += amount;
+
+    //         database[acno]["transaction"].push({
+    //             type: "CREDIT",
+    //             amount: amount
+    //         })
+
+    //         return {
+    //             statusCode: 200,
+    //             status: true,
+    //             message: 'balance is ' + database[acno]["balance"]
+    //         }
+    //     }
+    //     else {
+    //         return {
+    //             statusCode: 422,
+    //             status: false,
+    //             message: 'Invalid password'
+
+    //         }
+    //     }
+    // }
+    // else {
+    //     return {
+    //         statusCode: 422,
+    //         status: false,
+    //         message: "Wrong Accont Number"
+    //     }
+    // }
 
 }
 
 // resolve withdraw API
-
-const withdraw = (req,acno, pswd, amt) => {
+const withdraw = (acno, pswd, amt) => {
     var amount = parseInt(amt);
+    
+return db.User.findOne({acno,password:pswd,amt}).then(user=>{
 
-    if (acno in database) {
-        if (pswd == database[acno]["password"]) {
-            if(req.currentAcno!=acno){
-                return{
-                    statusCode: 422,
-                    status: false,
-                    message: " operation denied"
-                }
-            }
-            if (database[acno]["balance"] > amount) {
-                database[acno]["balance"] -= amount;
-                database[acno]["transaction"].push({
-                    type: "DEBIT",
-                    amount: amount
+ if(user){
 
-                })
+    if(req.currentAcno=acno){
+        if (user.balance > amount) {
+                            user.balance -= amount;
 
-                return {
-                    statusCode: 200,
-                    status: true,
-                    message: 'balance is ' + database[acno]["balance"]
-                }
-            }
+                            user.transaction.push({
+                                type: "DEBIT",
+                                amount: amount
+                            })
+                            user.save()
+                            return {
+                                statusCode: 200,
+                                status: true,
+                                message: 'balance is ' + user.balance
+                        }
 
 
-            else {
-
-                return {
-                    statusCode: 422,
-                    status: false,
-                    message: "Insuffient balance"
-                }
-
-            }
-        }
-        else {
-            return {
-                statusCode: 422,
-                status: false,
-                message: "Wrong Password"
-            }
-        }
     }
-    else {
-        return {
+    else{
+
+        return{
             statusCode: 422,
             status: false,
-            message: "Wrong Accont Number"
+            message: " operation denied"
         }
+
     }
+
+ }}
+   else{
+    return {
+        statusCode: 422,
+        status: false,
+        message: 'Invalid credentials'
+
+    }
+   }
+
+})
+
+
+//     if (acno in database) {
+//         if (pswd == database[acno]["password"]) {
+//             if(req.currentAcno!=acno){
+//                 return{
+//                     statusCode: 422,
+//                     status: false,
+//                     message: " operation denied"
+//                 }
+//             }
+//             if (database[acno]["balance"] > amount) {
+//                 database[acno]["balance"] -= amount;
+//                 database[acno]["transaction"].push({
+//                     type: "DEBIT",
+//                     amount: amount
+
+//                 })
+
+//                 return {
+//                     statusCode: 200,
+//                     status: true,
+//                     message: 'balance is ' + database[acno]["balance"]
+//                 }
+//             }
+
+
+//             else {
+
+//                 return {
+//                     statusCode: 422,
+//                     status: false,
+//                     message: "Insuffient balance"
+//                 }
+
+//             }
+//         }
+//         else {
+//             return {
+//                 statusCode: 422,
+//                 status: false,
+//                 message: "Wrong Password"
+//             }
+//         }
+//     }
+//     else {
+//         return {
+//             statusCode: 422,
+//             status: false,
+//             message: "Wrong Accont Number"
+//         }
+//     }
 
 }
 
@@ -214,20 +289,40 @@ const withdraw = (req,acno, pswd, amt) => {
 
 const transaction = (acno)=>{
 
-    if(acno in database){
-        return{
-            statusCode: 200,
-            status: true,
-            transaction:database[acno].transaction
+    return db.User.findOne({acno}).then(user=>{
+
+        if(user){
+            return{
+                statusCode: 200,
+                status: true,
+                transaction:user.transaction
+            }
         }
-    }
-    else{
-        return{
-            statusCode: 422,
-            status: false,
-            message:"User doesnot exit"
+
+        else{
+            return{
+                statusCode: 422,
+                status: false,
+                message:"User doesnot exit"
+            }
         }
-    }
+    })
+
+
+    // if(acno in database){
+    //     return{
+    //         statusCode: 200,
+    //         status: true,
+    //         transaction:database[acno].transaction
+    //     }
+    // }
+    // else{
+    //     return{
+    //         statusCode: 422,
+    //         status: false,
+    //         message:"User doesnot exit"
+    //     }
+    // }
 
   }
 
