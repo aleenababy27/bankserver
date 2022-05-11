@@ -1,5 +1,3 @@
-
-
 const express =  require('express'); //import express
 
 const jwt = require('jsonwebtoken'); // import jsonwebtoken
@@ -143,6 +141,14 @@ app.post('/withdraw',jwtMiddleware,(req,res)=>{
 
 app.post('/transaction',jwtMiddleware,(req,res)=>{ 
     dataservice.transaction(req.body.acno).then(result=>{res.status(result.statusCode).json(result)
+})
+})
+
+//on Delete API call
+
+app.delete('/onDelete/:acno',jwtMiddleware,(req,res)=>{ 
+   
+    dataservice.deleteAcc(req.params.acno).then(result=>{res.status(result.statusCode).json(result)
 })
 })
 

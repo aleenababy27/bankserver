@@ -5,14 +5,14 @@ const jwt = require('jsonwebtoken')
 const db = require('./db')
 
 
-database = {
+// database = {
 
 
-    1000: { acno: 1000, uname: "Aleena", password: 1000, balance: 750, transaction: [] },
-    1001: { acno: 1001, uname: "Mariya", password: 1001, balance: 1500, transaction: [] },
-    1002: { acno: 1002, uname: "Augustine", password: 1002, balance: 50000, transaction: [] }
+//     1000: { acno: 1000, uname: "Aleena", password: 1000, balance: 750, transaction: [] },
+//     1001: { acno: 1001, uname: "Mariya", password: 1001, balance: 1500, transaction: [] },
+//     1002: { acno: 1002, uname: "Augustine", password: 1002, balance: 50000, transaction: [] }
 
-}
+// }
 
 const register = (uname, acno, password) => {
 
@@ -326,6 +326,29 @@ const transaction = (acno)=>{
 
   }
 
+
+  const deleteAcc = (acno)=>{
+
+      return db.User.deleteOne({acno}) .then(user=>{
+         if(!user){
+             console.log(user);
+            return {
+                statusCode: 422,
+                status: false,
+                message: " operation denied"
+            }
+         } 
+         else{
+            return {
+                statusCode: 200,
+                status: true,
+                message:"Account no " + acno + " deleted succesfully"
+        }
+
+         }
+      })
+
+  }
 // export module
 
 module.exports = {
@@ -333,6 +356,7 @@ module.exports = {
     login,
     deposit,
     withdraw,
-    transaction
+    transaction,
+    deleteAcc
 }
 
